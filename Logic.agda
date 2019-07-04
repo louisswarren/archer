@@ -8,6 +8,7 @@ open import Tree
 
 module Logic (X : Set) (_≟_ : Decidable≡ X) where
 
+
 infixr 105 _⇒_
 data Formula : Set where
   atom : X → Formula
@@ -55,21 +56,43 @@ data _⊢_ : Ensemble Formula → Formula → Set₁ where
                 →                              Γ₁ ∪ Γ₂ ⊢ β
 
 
+-- A deduction problem Γ ⊢ α has an equivalent problem Δ ⊢ atom x, which is
+-- obtained by assuming all premises in α
 
-reduce : ∀ Γ α → Assembled formulaEq Γ → Σ (Ensemble Formula) λ Δ → Σ X λ x → Δ ⊢ (atom x) → Γ ⊢ α
-reduce Γ (atom x) AΓ = Γ , x , λ ⊢x → close AΓ (λ x z z₁ → z₁ z) ⊢x
-reduce Γ (α ⇒ β)  AΓ = Δ , x , λ ⊢x → close AΓ cls (arrowintro α (ρ ⊢x))
+record Reduced {Γ : Ensemble Formula} (AΓ : Assembled formulaEq Γ) (α : Formula) : Set₁ where
+  constructor reduced
+  field
+    Δ   : Ensemble Formula
+    AΔ  : Assembled formulaEq Δ
+    x   : X
+    ⟨→⟩ : Δ ⊢ atom x → Γ ⊢ α
+    ⟨←⟩ : Γ ⊢ α → Δ ⊢ atom x
+
+reduce : ∀{Γ} → ∀ AΓ α → Reduced {Γ} AΓ α
+reduce {Γ} AΓ (atom x) = reduced Γ AΓ x (λ ⊢x → ⊢x) λ ⊢x → ⊢x
+reduce {Γ} AΓ (α ⇒ β)  = reduced
+                          (Reduced.Δ ind)
+                          (Reduced.AΔ ind)
+                          (Reduced.x ind)
+                          (λ Δ⊢x
+                           → close AΓ Γ∪α-α⊂Γ
+                              (arrowintro α
+                               (Reduced.⟨→⟩ ind
+                                Δ⊢x)))
+                          (λ Γ⊢α⇒β
+                           → close (Reduced.AΔ ind) Δ⊂Δ
+                              (Reduced.⟨←⟩ ind
+                               (arrowelim
+                                Γ⊢α⇒β
+                                (assume α))))
   where
     ind : _
-    ind = reduce (Γ ∪ ⟨ α ⟩) β (from AΓ ∪ from⟨ α ⟩)
-    Δ : Ensemble Formula
-    Δ = fst ind
-    x : X
-    x = fst (snd ind)
-    ρ : Δ ⊢ atom x → Γ ∪ ⟨ α ⟩ ⊢ β
-    ρ = snd (snd ind)
-    cls : (Γ ∪ ⟨ α ⟩) - α ⊂ Γ
-    cls = λ x₁ z z₁ → z (λ z₂ z₃ → z₃ z₁ z₂)
+    ind = reduce (from AΓ ∪ from⟨ α ⟩) β
+    Γ∪α-α⊂Γ : (Γ ∪ ⟨ α ⟩) - α ⊂ Γ
+    Γ∪α-α⊂Γ = λ x₁ z z₁ → z (λ z₂ z₃ → z₃ z₁ z₂)
+    Δ⊂Δ : Reduced.Δ ind ⊂ Reduced.Δ ind
+    Δ⊂Δ = λ x z z₁ → z₁ z
+
 
 
 data [_]⊩_ (xs : List X) : Formula → Set
