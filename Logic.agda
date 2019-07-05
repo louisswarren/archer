@@ -114,7 +114,7 @@ data _⊩_ {l} : Tree l → Formula → Set where
 
 data _⊩̷_ {l} : Tree l → Formula → Set where
   here  : ∀{t α} → [ l ]⊩̷ α → t ⊩̷ α
-  later : ∀{ts α} → List.Any (λ { (s , t) → t ⊩ α }) ts → branch ts ⊩̷ α
+  later : ∀{ts α} → List.Any (λ { (s , t) → t ⊩̷ α }) ts → branch ts ⊩̷ α
 
 
 -- Confirm that local non-forcing is equivalent to not forcing
