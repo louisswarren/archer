@@ -141,3 +141,11 @@ decide[ l ]⊩ (α ⇒ β) with decide[ l ]⊩ α | decide[ l ]⊩ β
 ¬[ l ]⊩ α ⇒ β pos nf | _      | yes ⊩β = ⊥-elim (nf (α ∣⇒ ⊩β))
 ¬[ l ]⊩ α ⇒ β pos nf | no ¬⊩α | _      = ⊥-elim (nf (¬[ l ]⊩ α pos ¬⊩α ⇒∣ β))
 
+-- Confirm that non-forcing is equivalent to not forcing
+
+_⊩̷_neg : ∀{l} → (t : Tree l) → (α : Formula) → t ⊩̷ α → ¬ (t ⊩ α)
+(leaf ⊩̷ α neg) (here [l]⊩̷α) (leaf [l]⊩α) = [ _ ]⊩̷ α neg [l]⊩̷α [l]⊩α
+(branch x ⊩̷ α neg) (here [l]⊩̷α) (branch [l]⊩α _) = [ _ ]⊩̷ α neg [l]⊩̷α [l]⊩α
+(branch .(_ ∷ _) ⊩̷ α neg) (later [ t⊩̷α ]) (branch _ (t⊩α ∷ _)) = (_ ⊩̷ α neg) t⊩̷α t⊩α
+(branch (_ ∷ ts) ⊩̷ α neg) (later (_ ∷ ∃ts⊩̷α)) (branch [l]⊩α (_ ∷ ts⊩α)) = (branch ts ⊩̷ α neg) (later ∃ts⊩̷α) (branch [l]⊩α ts⊩α)
+
