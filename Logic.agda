@@ -116,6 +116,32 @@ data _⊩̷_ {l} : Tree l → Formula → Set where
   here  : ∀{t α} → [ l ]⊩̷ α → t ⊩̷ α
   later : ∀{ts α} → List.Any (λ { (s , t) → t ⊩̷ α }) ts → branch ts ⊩̷ α
 
+monotone : ∀{l ts α} → [ l ]⊩ α → 
+
+
+data DecLocallyForces (l : List X) (α : Formula) : Set where
+  yes : [ l ]⊩ α → DecLocallyForces l α
+  no  : [ l ]⊩̷ α → DecLocallyForces l α
+
+data DecForces {l} (t : Tree l) (α : Formula) : Set where
+  yes : t ⊩ α → DecForces t α
+  no  : t ⊩̷ α → DecForces t α
+
+[_]⊩%_ : (l : List X) → (α : Formula) → DecLocallyForces l α
+[ l ]⊩% atom x  with List.decide∈ _≟_ x l
+...             | yes x∈l = yes (atom x∈l)
+...             | no  x∉l = no  (atom x∉l)
+[ l ]⊩% (α ⇒ β) with [ l ]⊩% α | [ l ]⊩% β
+...             | _      | yes ⊩β = yes (α ∣⇒ ⊩β)
+...             | no ⊩̷α  | _      = yes (⊩̷α ⇒∣ β)
+...             | yes ⊩α | no ⊩̷β  = no (⊩α ⇒ ⊩̷β)
+
+_⊩%_ : ∀{l} → (t : Tree l) → (α : Formula) → DecForces t α
+_⊩%_ {l} t α with [ l ]⊩% α
+leaf        ⊩% α | yes [l]⊩α = yes (leaf [l]⊩α)
+(branch ts) ⊩% α | yes [l]⊩α = yes {!   !}
+t ⊩% α       | no  [l]⊩̷α = {!   !}
+
 
 -- Confirm that local non-forcing is equivalent to not forcing
 [_]⊩̷_neg : (l : List X) → (α : Formula) → [ l ]⊩̷ α → ¬ [ l ]⊩ α
