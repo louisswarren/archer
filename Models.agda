@@ -1,99 +1,15 @@
-open import Agda.Builtin.Nat renaming (Nat to ℕ) hiding (_-_)
+open import Decidable
+
+module Models (X : Set) (_≟_ : Decidable≡ X) where
+
 open import Agda.Builtin.Sigma
 
-open import Decidable
-open import Ensemble
+open import Formula X _≟_
 open import List
 open import Tree
 
-module Logic (X : Set) (_≟_ : Decidable≡ X) where
 
-
-infixr 105 _⇒_
-data Formula : Set where
-  atom : X → Formula
-  _⇒_  : Formula → Formula → Formula
-
-formulaEq : Decidable≡ Formula
-formulaEq (atom x) (atom y) with x ≟ y
-...                         | yes refl = yes refl
-...                         | no  x≢y  = no λ { refl → x≢y refl }
-formulaEq (α ⇒ β)  (γ ⇒ δ)  with formulaEq α γ | formulaEq β δ
-...                         | yes refl | yes refl = yes refl
-...                         | _        | no γ≢δ   = no λ { refl → γ≢δ refl }
-...                         | no α≢β   | _        = no λ { refl → α≢β refl }
-formulaEq (atom _) (_ ⇒ _)  = no λ ()
-formulaEq (_ ⇒ _)  (atom _) = no λ ()
-
-
-∣_∣ : Formula → ℕ
-∣ atom _       ∣ = zero
-∣ (atom _) ⇒ β ∣ = ∣ β ∣
-∣ (_ ⇒ _ ) ⇒ β ∣ = suc ∣ β ∣
-
-SimpleFormula : Formula → Set
-SimpleFormula α = ∣ α ∣ ≡ zero
-
-LeftFormula : Formula → Set
-LeftFormula α = Σ ℕ λ k → ∣ α ∣ ≡ suc k
-
-
-infix 1 _⊢_ _⊩_ _⊩̷_
-data _⊢_ : Ensemble Formula → Formula → Set₁ where
-  close       : ∀{Γ Δ α} → Assembled formulaEq Δ → Γ ⊂ Δ → Γ ⊢ α → Δ ⊢ α
-
-  assume      : (α : Formula)
-                →                               ⟨ α ⟩ ⊢ α
-
-  arrowintro  : ∀{Γ β} → (α : Formula)
-                →                                 Γ ⊢ β
-                                             --------------- ⇒⁺
-                →                             Γ - α ⊢ α ⇒ β
-
-  arrowelim   : ∀{Γ₁ Γ₂ α β}
-                →                       Γ₁ ⊢ α ⇒ β    →    Γ₂ ⊢ α
-                                       --------------------------- ⇒⁻
-                →                              Γ₁ ∪ Γ₂ ⊢ β
-
-
--- A deduction problem Γ ⊢ α has an equivalent problem Δ ⊢ atom x, which is
--- obtained by assuming all premises in α
-
-record Reduced {Γ : Ensemble Formula} (AΓ : Assembled formulaEq Γ) (α : Formula) : Set₁ where
-  constructor reduced
-  field
-    Δ   : Ensemble Formula
-    AΔ  : Assembled formulaEq Δ
-    x   : X
-    ⟨→⟩ : Δ ⊢ atom x → Γ ⊢ α
-    ⟨←⟩ : Γ ⊢ α → Δ ⊢ atom x
-
-reduce : ∀{Γ} → ∀ AΓ α → Reduced {Γ} AΓ α
-reduce {Γ} AΓ (atom x) = reduced Γ AΓ x (λ ⊢x → ⊢x) λ ⊢x → ⊢x
-reduce {Γ} AΓ (α ⇒ β)  = reduced
-                          (Reduced.Δ ind)
-                          (Reduced.AΔ ind)
-                          (Reduced.x ind)
-                          (λ Δ⊢x
-                           → close AΓ Γ∪α-α⊂Γ
-                              (arrowintro α
-                               (Reduced.⟨→⟩ ind
-                                Δ⊢x)))
-                          (λ Γ⊢α⇒β
-                           → close (Reduced.AΔ ind) Δ⊂Δ
-                              (Reduced.⟨←⟩ ind
-                               (arrowelim
-                                Γ⊢α⇒β
-                                (assume α))))
-  where
-    ind : _
-    ind = reduce (from AΓ ∪ from⟨ α ⟩) β
-    Γ∪α-α⊂Γ : (Γ ∪ ⟨ α ⟩) - α ⊂ Γ
-    Γ∪α-α⊂Γ = λ x₁ z z₁ → z (λ z₂ z₃ → z₃ z₁ z₂)
-    Δ⊂Δ : Reduced.Δ ind ⊂ Reduced.Δ ind
-    Δ⊂Δ = λ x z z₁ → z₁ z
-
-
+infix 1 _⊨_ _⊨̷_ _⊩_ _⊩̷_
 
 data _⊨_ (xs : List X) : Formula → Set
 data _⊨̷_ (xs : List X) : Formula → Set
