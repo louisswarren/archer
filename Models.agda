@@ -35,17 +35,16 @@ data _⊩̷_ {l : List X} : Tree l → Formula → Set where
   branch : ∀{α ts} → Any ((_⊩̷ α) ∘lop) ts → branch ts ⊩̷ α
 
 
--- Check that forcing is monotone
-monotone⊩ : ∀{l m} → (t : Tree l) → (t′ : Tree m)
-                     → t ≼ t′ → ∀ α → t ⊩ α → t′ ⊩ α
-monotone⊩ t .t root α t⊩α = t⊩α
-monotone⊩ (branch ts) t′ (branch t∈ts t≼t′) α (branch _ ts⊩α)
-    = monotone⊩ _ t′ t≼t′ α (∈All ts⊩α t∈ts)
+monotone⊩ : ∀ α → Monotone (_⊩ α)
+monotone⊩ α t .t root t⊩α = t⊩α
+monotone⊩ α (branch ts) t′ (branch t∈ts t≼t′) (branch _ ts⊩α)
+    = monotone⊩ α _ t′ t≼t′ (∈All ts⊩α t∈ts)
   where
     ∈All : {A : Set} {P : A → Set} {x : A} {xs : List A}
            → All P xs → x ∈ xs → P x
     ∈All (Px ∷ Pxs) [ refl ]    = Px
     ∈All (_  ∷ Pxs) (_ ∷ x∈xxs) = ∈All Pxs x∈xxs
+
 
 
 --data DecLocallyForces (l : List X) (α : Formula) : Set where

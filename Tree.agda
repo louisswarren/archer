@@ -23,3 +23,6 @@ data _≼_ {A : Set} {l : List A} : Tree l → {m : List A} → Tree m → Set w
   root   : ∀{t} → t ≼ t
   branch : ∀{ts s t m} {t′ : Tree m}
            → (s , t) ∈ ts → t ≼ t′ → (branch ts) ≼ t′
+
+Monotone : {A : Set} → (P : {l : List A} → Tree l → Set) → Set
+Monotone P = ∀{l m} → (t : Tree l) → (t′ : Tree m) → t ≼ t′ → P t → P t′
