@@ -6,7 +6,7 @@ open import Ensemble
 
 open import Formula X _≟_
 
-infix 1 _⊢_
+infix 1 _⊢_ ⊢_
 data _⊢_ : Ensemble Formula → Formula → Set₁ where
   close       : ∀{Γ Δ α} → Assembled formulaEq Δ → Γ ⊂ Δ → Γ ⊢ α → Δ ⊢ α
 
@@ -23,6 +23,8 @@ data _⊢_ : Ensemble Formula → Formula → Set₁ where
                                        --------------------------- ⇒⁻
                 →                              Γ₁ ∪ Γ₂ ⊢ β
 
+⊢_ : Formula → Set₁
+⊢ α = ∅ ⊢ α
 
 -- A deduction problem Γ ⊢ α has an equivalent problem Δ ⊢ atom x, which is
 -- obtained by assuming all premises in α

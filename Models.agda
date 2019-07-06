@@ -4,9 +4,10 @@ module Models (X : Set) (_≟_ : Decidable≡ X) where
 
 open import Agda.Builtin.Sigma
 
-open import Formula X _≟_
 open import List
 open import Tree
+
+open import Formula X _≟_
 
 
 infix 1 _⊨_ _⊨̷_ _⊩_ _⊩̷_
