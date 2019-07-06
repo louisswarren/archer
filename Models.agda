@@ -23,12 +23,29 @@ data _⊨̷_ xs where
   atom : ∀{x} → x List.∉ xs → xs ⊨̷ atom x
   _⇒_  : ∀{α β} → xs ⊨ α → xs ⊨̷ β → xs ⊨̷ (α ⇒ β)
 
+-- Note that the above classical entailment is NOT monotone in a Kripke tree
 
-_⊩_ : {l : List X} → Tree l → Formula → Set
-t ⊩ α = AllTree (_⊨ α) t
 
-_⊩̷_ : {l : List X} → Tree l → Formula → Set
-t ⊩̷ α = AnyTree (_⊨̷ α) t
+data _⊩_ {l : List X} : Tree l → Formula → Set where
+  leaf   : ∀{α}    → l ⊨ α                        → leaf      ⊩ α
+  branch : ∀{α ts} → l ⊨ α → All ((_⊩ α) ∘lop) ts → branch ts ⊩ α
+
+data _⊩̷_ {l : List X} : Tree l → Formula → Set where
+  root   : ∀{α t}  → l ⊨̷ α → t ⊩̷ α
+  branch : ∀{α ts} → Any ((_⊩̷ α) ∘lop) ts → branch ts ⊩̷ α
+
+
+-- Check that forcing is monotone
+monotone⊩ : ∀{l m} → (t : Tree l) → (t′ : Tree m)
+                     → t ≼ t′ → ∀ α → t ⊩ α → t′ ⊩ α
+monotone⊩ t .t root α t⊩α = t⊩α
+monotone⊩ (branch ts) t′ (branch t∈ts t≼t′) α (branch _ ts⊩α)
+    = monotone⊩ _ t′ t≼t′ α (∈All ts⊩α t∈ts)
+  where
+    ∈All : {A : Set} {P : A → Set} {x : A} {xs : List A}
+           → All P xs → x ∈ xs → P x
+    ∈All (Px ∷ Pxs) [ refl ]    = Px
+    ∈All (_  ∷ Pxs) (_ ∷ x∈xxs) = ∈All Pxs x∈xxs
 
 
 --data DecLocallyForces (l : List X) (α : Formula) : Set where
