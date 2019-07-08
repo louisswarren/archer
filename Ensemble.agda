@@ -73,3 +73,14 @@ data All_[_∖_] {A : Set} (P : Pred A) : Ensemble A → List A → Set₁ where
 
 All : {A : Set} → Pred A → Ensemble A → Set₁
 All P αs = All P [ αs ∖ [] ]
+
+
+stable∈ : {A : Set} {Γ : Ensemble A} → (eq : Decidable≡ A) → Assembled eq Γ → ∀ x → ¬(x ∉ Γ) → x ∈ Γ
+stable∈ eq from∅ x ¬x∉Γ = ¬x∉Γ (λ z → z)
+stable∈ eq from⟨ y ⟩ x ¬x∉Γ with eq x y
+...                         | yes refl = refl
+...                         | no x≢y = ⊥-elim (¬x∉Γ x≢y)
+stable∈ eq (from αs ∪ βs) x ¬x∉Γ = λ z z₁ → z₁ (stable∈ eq βs x (λ z₂ → ¬x∉Γ (λ z₃ → z₃ z z₂)))
+stable∈ eq (from αs - y)  x ¬x∉Γ = λ z →   z (λ z₁ → ¬x∉Γ (λ z₂ → z₂ (λ z₃ _ → z₃ z₁)))   (stable∈ eq αs x (λ z₁ → ¬x∉Γ (λ z₂ → z₂ (λ _ → z₁))))
+
+

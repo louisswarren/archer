@@ -26,6 +26,12 @@ data _⊢_ : Ensemble Formula → Formula → Set₁ where
 ⊢_ : Formula → Set₁
 ⊢ α = ∅ ⊢ α
 
+assembled-context : ∀{Γ α} → Γ ⊢ α → Assembled formulaEq Γ
+assembled-context (close x _ _) = x
+assembled-context (assume α) = from⟨ α ⟩
+assembled-context (arrowintro α d) = from assembled-context d - α
+assembled-context (arrowelim d₁ d₂) = from assembled-context d₁ ∪ assembled-context d₂
+
 -- A deduction problem Γ ⊢ α has an equivalent problem Δ ⊢ atom x, which is
 -- obtained by assuming all premises in α
 
