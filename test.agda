@@ -1,26 +1,17 @@
-open import Agda.Builtin.Sigma
 open import Agda.Builtin.Nat renaming (Nat to ℕ)
-open import Agda.Builtin.List
 
 open import Decidable
-open import Ensemble
 
-natEq : Decidable≡ ℕ
-natEq zero    zero    = yes refl
-natEq zero    (suc m) = no λ ()
-natEq (suc n) zero    = no λ ()
-natEq (suc n) (suc m) with natEq n m
-...                   | yes refl = yes refl
-...                   | no  n≢m  = no  λ { refl → n≢m refl }
+instance ℕD : Discrete ℕ
+ℕD ⟨ zero  ≟ zero  ⟩ = yes refl
+ℕD ⟨ suc x ≟ suc y ⟩ with x ≟ y
+...                  | yes refl = yes refl
+...                  | no  x≢y  = no  λ { refl → x≢y refl }
+ℕD ⟨ zero  ≟ suc _ ⟩ = no λ ()
+ℕD ⟨ suc _ ≟ zero  ⟩ = no λ ()
 
-open import Logic ℕ natEq
+open import Formula ℕ
+open import List
 
-
-α β γ : Formula
-α = atom 1
-β = atom 2
-γ = atom 3
-
-n = reduce ∅ (α ⇒ β ⇒ γ) from∅
-δ = fst n
-x = fst (snd n)
+fis_∈_ : (x : Formula) → (xs : List Formula) → Dec (x ∈ xs)
+fis x ∈ xs = is x ∈ xs
