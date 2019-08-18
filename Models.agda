@@ -113,3 +113,10 @@ monotone⊩ α (branch ts) t′ (branch t∈ts t≼t′) (branch _ ts⊩α)
 --⊨⇒to→ : ∀{l α β} → l ⊨ α ⇒ β → l ⊨ α → l ⊨ β
 --⊨⇒to→ (α ∣⇒ ⊨β) ⊨α = ⊨β
 --⊨⇒to→ (⊨̷α ⇒∣ β) ⊨α = ⊥-elim (⊨̷→¬⊨ ⊨̷α ⊨α)
+
+
+atom-rule : ∀{l} {t : Tree l} → ∀ x → x ∈ l → t ⊩ atom x
+atom-rule {l} {leaf} x x∈l = leaf (atom x∈l)
+atom-rule {l} {branch x₁} x x∈l = branch (atom x∈l) (fAll λ { (s , t) r → atom-rule x {!  monotone⊨!} })
+
+arrow-rule : ∀{α β l} {t : Tree l} → (∀ t′ → t ≼ t′ → t′ ⊩ α → t′ ⊩ β) → t ⊩ α ⇒ β

@@ -44,3 +44,8 @@ x ∉ xs = ¬(x ∈ xs)
 
 decide∈ : ∀{A} → Decidable≡ A → (x : A) → (xs : List A) → Dec (x ∈ xs)
 decide∈ _≟_ x xs = any (x ≟_) xs
+
+
+fAll : ∀{A xs} {P : Pred A} → (∀ x → x ∈ xs → P x) → All P xs
+fAll {A} {[]} fall = []
+fAll {A} {x ∷ xs} fall = fall x [ refl ] ∷ fAll (λ y y∈xs → fall y (x ∷ y∈xs))

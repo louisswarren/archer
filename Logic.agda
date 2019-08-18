@@ -20,6 +20,8 @@ soundness : ∀{Γ} → Assembled formulaEq Γ → ∀ α
             → Γ ⊢ α → ∀{l} → (t : Tree l) → (∀ γ → γ Ensemble.∈ Γ → t ⊩ γ) → t ⊩ α
 soundness AΓ α (close AΔ Δ⊂Γ ⊢α) t t⊩Γ = soundness (assembled-context ⊢α) α ⊢α t λ γ γ∈Δ → t⊩Γ γ (stable∈ formulaEq {! AΓ  !} α (Δ⊂Γ γ γ∈Δ))
 soundness AΓ α (assume .α) t t⊩Γ = t⊩Γ α refl
-soundness AΓ (α ⇒ β) (arrowintro α ⊢α) leaf t⊩Γ = {!   !}
+soundness AΓ (α ⇒ β) (arrowintro α ⊢α) leaf t⊩Γ with does leaf ⊩ α
+...                                             | yes ⊩α = leaf (α ∣⇒ {!   !})
+...                                             | no  ⊩̷α = {!   !}
 soundness AΓ (α ⇒ β) (arrowintro α ⊢α) (branch x₁) t⊩Γ = {!   !}
 soundness AΓ α (arrowelim ⊢α ⊢α₁) t = {!   !}

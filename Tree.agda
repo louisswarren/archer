@@ -26,3 +26,10 @@ data _≼_ {A : Set} {l : List A} : Tree l → {m : List A} → Tree m → Set w
 
 Monotone : {A : Set} → (P : {l : List A} → Tree l → Set) → Set
 Monotone P = ∀{l m} → (t : Tree l) → (t′ : Tree m) → t ≼ t′ → P t → P t′
+
+
+-- Labelling is indeed monotone
+label-monotone : {A : Set} {l m : List A}
+                 → (t : Tree l) → (t′ : Tree m) → t ≼ t′ → ∀ x → x ∈ l → x ∈ m
+label-monotone t .t root x x∈l = x∈l
+label-monotone (branch ts) t′ (branch x₁ p) x x∈l = {!   !}
