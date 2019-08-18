@@ -22,5 +22,11 @@ Pred A = A → Set
 Decidable : {A : Set} → Pred A → Set
 Decidable P = ∀ x → Dec (P x)
 
-Decidable≡ : Set → Set
-Decidable≡ A = (x y : A) → Dec (x ≡ y)
+record Discrete (A : Set) : Set where
+  constructor discrete
+  field
+    _⟨_≟_⟩ : (x y : A) → Dec (x ≡ y)
+open Discrete public
+
+_≟_ : {A : Set} ⦃ _ : Discrete A ⦄ → (x y : A) → Dec (x ≡ y)
+_≟_ ⦃ d ⦄ x y = d ⟨ x ≟ y ⟩
